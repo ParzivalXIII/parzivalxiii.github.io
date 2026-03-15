@@ -83,13 +83,22 @@ function fetchRepo(repoName) {
   });
 }
 
-Promise.all(FEATURED_REPOS.map(fetchRepo))
-  .then(repos => {
+Promise.allSettled(FEATURED_REPOS.map(fetchRepo))
+  .then(results => {
     const container = document.getElementById('repos');
     const loading   = document.getElementById('featured-loading');
     const error     = document.getElementById('featured-error');
 
     if (loading) loading.hidden = true;
+
+    const repos = results
+      .filter(r => r.status === 'fulfilled')
+      .map(r => r.value);
+
+    if (repos.length === 0) {
+      if (error) error.hidden = false;
+      return;
+    }
 
     renderRepos(repos, container);
   })

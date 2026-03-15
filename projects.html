@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="All GitHub repositories by Parzival — Backend Developer & Applied AI Engineer." />
+  <title>Projects &mdash; Parzival</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <!-- ======= NAVBAR ======= -->
+  <header class="navbar">
+    <div class="container navbar__inner">
+      <a href="index.html" class="navbar__brand">Parzival</a>
+      <button class="navbar__toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="nav-menu">
+        <span class="navbar__toggle-bar"></span>
+        <span class="navbar__toggle-bar"></span>
+        <span class="navbar__toggle-bar"></span>
+      </button>
+      <nav id="nav-menu" class="navbar__menu" role="navigation">
+        <ul class="navbar__list">
+          <li><a href="index.html" class="navbar__link">Home</a></li>
+          <li><a href="projects.html" class="navbar__link navbar__link--active">Projects</a></li>
+          <li><a href="about.html" class="navbar__link">About</a></li>
+          <li>
+            <a
+              href="https://github.com/ParzivalXIII"
+              class="navbar__link navbar__link--cta"
+              target="_blank"
+              rel="noopener noreferrer"
+            >GitHub &#8599;</a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ======= PAGE HEADER ======= -->
+    <section class="page-header" aria-labelledby="page-title">
+      <div class="container">
+        <h1 id="page-title" class="page-header__title">Projects</h1>
+        <p class="page-header__subtitle">
+          All public repositories, sorted by most recently updated.
+        </p>
+      </div>
+    </section>
+
+    <!-- ======= REPOSITORY LIST ======= -->
+    <section class="section" aria-labelledby="repos-heading">
+      <div class="container">
+        <h2 id="repos-heading" class="visually-hidden">Repositories</h2>
+
+        <!-- Status messages -->
+        <div id="repos-status" class="repos-status" aria-live="polite" aria-atomic="true">
+          <div class="repos-status__loading" id="repos-loading">
+            <span class="spinner" aria-hidden="true"></span>
+            Loading repositories&hellip;
+          </div>
+          <div class="repos-status__error" id="repos-error" hidden>
+            <p>
+              Unable to load repositories. This may be due to a rate limit or network issue.<br />
+              <a
+                href="https://github.com/ParzivalXIII?tab=repositories"
+                target="_blank"
+                rel="noopener noreferrer"
+              >View repositories directly on GitHub &#8599;</a>
+            </p>
+          </div>
+        </div>
+
+        <!-- Repo cards injected here by repos.js -->
+        <div id="repos-grid" class="cards-grid" aria-label="Repository list"></div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ======= FOOTER ======= -->
+  <footer class="footer">
+    <div class="container footer__inner">
+      <p class="footer__copy">&copy; <span id="footer-year"></span> Parzival. Built with HTML, CSS &amp; JavaScript.</p>
+      <a
+        href="https://github.com/ParzivalXIII"
+        class="footer__link"
+        target="_blank"
+        rel="noopener noreferrer"
+      >GitHub</a>
+    </div>
+  </footer>
+
+  <script>
+    // Navbar mobile toggle
+    const toggle = document.querySelector('.navbar__toggle');
+    const menu   = document.querySelector('.navbar__menu');
+    toggle.addEventListener('click', () => {
+      const expanded = toggle.getAttribute('aria-expanded') === 'true';
+      toggle.setAttribute('aria-expanded', String(!expanded));
+      menu.classList.toggle('navbar__menu--open');
+    });
+
+    // Footer year
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+  </script>
+  <script src="js/repos.js"></script>
+
+</body>
+</html>

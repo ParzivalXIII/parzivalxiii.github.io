@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="About Parzival &mdash; Backend Developer & Applied AI Engineer. Background, technology stack, and current focus." />
+  <title>About &mdash; Parzival</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <!-- ======= NAVBAR ======= -->
+  <header class="navbar">
+    <div class="container navbar__inner">
+      <a href="index.html" class="navbar__brand">Parzival</a>
+      <button class="navbar__toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="nav-menu">
+        <span class="navbar__toggle-bar"></span>
+        <span class="navbar__toggle-bar"></span>
+        <span class="navbar__toggle-bar"></span>
+      </button>
+      <nav id="nav-menu" class="navbar__menu" role="navigation">
+        <ul class="navbar__list">
+          <li><a href="index.html" class="navbar__link">Home</a></li>
+          <li><a href="projects.html" class="navbar__link">Projects</a></li>
+          <li><a href="about.html" class="navbar__link navbar__link--active">About</a></li>
+          <li>
+            <a
+              href="https://github.com/ParzivalXIII"
+              class="navbar__link navbar__link--cta"
+              target="_blank"
+              rel="noopener noreferrer"
+            >GitHub &#8599;</a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ======= PAGE HEADER ======= -->
+    <section class="page-header" aria-labelledby="page-title">
+      <div class="container">
+        <h1 id="page-title" class="page-header__title">About</h1>
+        <p class="page-header__subtitle">Background, technology stack, and current focus.</p>
+      </div>
+    </section>
+
+    <!-- ======= BACKGROUND ======= -->
+    <section class="section" aria-labelledby="background-heading">
+      <div class="container about-layout">
+
+        <article class="about-section">
+          <h2 id="background-heading" class="about-section__title">Background</h2>
+          <div class="about-section__content prose">
+            <p>
+              I am a backend developer focused on building reliable, production-oriented systems
+              with Python. My work centers on API-driven architectures, asynchronous services,
+              and AI-powered backend systems.
+            </p>
+            <p>
+              I primarily develop backend services using FastAPI and Python, emphasizing modular
+              architecture, database design, and scalable service patterns. My projects typically
+              integrate modern AI tooling such as LLM orchestration frameworks, vector databases,
+              and automated workflows.
+            </p>
+            <p>My development approach prioritizes:</p>
+            <ul>
+              <li>clear system architecture</li>
+              <li>maintainable codebases</li>
+              <li>observable and testable services</li>
+              <li>automation of complex workflows</li>
+            </ul>
+            <p>
+              Most of my projects explore practical applications of AI systems, including document
+              retrieval pipelines, agent-driven workflows, and intelligent decision-support tools.
+            </p>
+          </div>
+        </article>
+
+        <!-- ======= TECHNOLOGY STACK ======= -->
+        <article class="about-section">
+          <h2 id="stack-heading" class="about-section__title">Technology Stack</h2>
+          <p class="about-section__intro">
+            My work focuses on a Python-centric backend ecosystem with supporting infrastructure
+            for AI systems and distributed services.
+          </p>
+
+          <div class="stack-grid">
+
+            <div class="stack-group">
+              <h3 class="stack-group__title">Backend Development</h3>
+              <ul class="stack-list">
+                <li>Python</li>
+                <li>FastAPI</li>
+                <li>async / await patterns</li>
+                <li>REST API architecture</li>
+              </ul>
+            </div>
+
+            <div class="stack-group">
+              <h3 class="stack-group__title">Data &amp; Storage</h3>
+              <ul class="stack-list">
+                <li>PostgreSQL</li>
+                <li>Redis</li>
+                <li>SQLModel (ORM)</li>
+              </ul>
+            </div>
+
+            <div class="stack-group">
+              <h3 class="stack-group__title">Agentic &amp; LLM Systems</h3>
+              <ul class="stack-list">
+                <li>LangChain</li>
+                <li>LangGraph</li>
+                <li>Retrieval-Augmented Generation (RAG)</li>
+                <li>Qdrant</li>
+                <li>ChromaDB</li>
+              </ul>
+            </div>
+
+            <div class="stack-group">
+              <h3 class="stack-group__title">Infrastructure &amp; DevOps</h3>
+              <ul class="stack-list">
+                <li>Docker</li>
+                <li>Docker Compose</li>
+                <li>Background workers (ARQ)</li>
+                <li>Caching with Redis</li>
+              </ul>
+            </div>
+
+            <div class="stack-group">
+              <h3 class="stack-group__title">Development Tools</h3>
+              <ul class="stack-list">
+                <li>Git / GitHub</li>
+                <li>VSCode</li>
+                <li>Logging with Loguru</li>
+                <li>API testing with Postman / curl</li>
+              </ul>
+            </div>
+
+          </div>
+        </article>
+
+        <!-- ======= CURRENT FOCUS ======= -->
+        <article class="about-section">
+          <h2 id="focus-heading" class="about-section__title">Current Focus</h2>
+          <p class="about-section__intro">
+            My current work focuses on building AI-enhanced backend systems and agentic workflows.
+            Areas I am actively developing expertise in include:
+          </p>
+
+          <div class="focus-grid">
+
+            <div class="focus-item">
+              <h3 class="focus-item__title">Agentic AI Systems</h3>
+              <p class="focus-item__desc">
+                Designing systems where LLMs coordinate tasks such as retrieval, analysis, and
+                decision-making across structured workflows.
+              </p>
+            </div>
+
+            <div class="focus-item">
+              <h3 class="focus-item__title">RAG Infrastructure</h3>
+              <p class="focus-item__desc">
+                Developing retrieval pipelines capable of ingesting, indexing, and querying
+                document collections for AI-assisted applications.
+              </p>
+            </div>
+
+            <div class="focus-item">
+              <h3 class="focus-item__title">Event-Driven Backends</h3>
+              <p class="focus-item__desc">
+                Implementing asynchronous services that rely on background workers, message
+                queues, and distributed task processing.
+              </p>
+            </div>
+
+            <div class="focus-item">
+              <h3 class="focus-item__title">Production-Oriented System Design</h3>
+              <p class="focus-item__desc">
+                Building systems that prioritize reliability, observability, and modular
+                architecture suitable for real-world deployment.
+              </p>
+            </div>
+
+          </div>
+
+          <p class="about-section__note">
+            Many of my current projects explore how AI agents can augment operational systems
+            such as inventory monitoring, workflow orchestration, and developer tooling.
+          </p>
+        </article>
+
+      </div><!-- /.about-layout -->
+    </section>
+
+  </main>
+
+  <!-- ======= FOOTER ======= -->
+  <footer class="footer">
+    <div class="container footer__inner">
+      <p class="footer__copy">&copy; <span id="footer-year"></span> Parzival. Built with HTML, CSS &amp; JavaScript.</p>
+      <a
+        href="https://github.com/ParzivalXIII"
+        class="footer__link"
+        target="_blank"
+        rel="noopener noreferrer"
+      >GitHub</a>
+    </div>
+  </footer>
+
+  <script>
+    // Navbar mobile toggle
+    const toggle = document.querySelector('.navbar__toggle');
+    const menu   = document.querySelector('.navbar__menu');
+    toggle.addEventListener('click', () => {
+      const expanded = toggle.getAttribute('aria-expanded') === 'true';
+      toggle.setAttribute('aria-expanded', String(!expanded));
+      menu.classList.toggle('navbar__menu--open');
+    });
+
+    // Footer year
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+  </script>
+
+</body>
+</html>

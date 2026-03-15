@@ -1,6 +1,6 @@
 /* =====================================================
    styles.css — Parzival Portfolio
-   Auto dark/light theme via prefers-color-scheme
+   Theme: Parchment & Aged Brass
    Mobile-first responsive layout
    ===================================================== */
 
@@ -54,71 +54,50 @@
 }
 
 /* -------------------------------------------------------
-   2. LIGHT THEME (default)
+   2. COLOUR THEME — Parchment & Aged Brass
+   Background:       #F4F1EA  Parchment
+   Primary Text:     #1E1E1E  Ink Black
+   Accent:           #B08D57  Aged Brass
+   Secondary Accent: #3A506B  Oxide Blue
+   Card Background:  #FFFFFF  Ivory Paper
+   Borders:          #D8D4CC  Soft Stone
 ------------------------------------------------------- */
 
 :root {
-  --color-bg:           #ffffff;
-  --color-bg-subtle:    #f6f8fa;
-  --color-bg-card:      #ffffff;
-  --color-border:       #d0d7de;
-  --color-border-muted: #e8ecf0;
+  /* Surfaces */
+  --color-bg:           #F4F1EA; /* Parchment */
+  --color-bg-subtle:    #EDE9E1; /* Parchment — slightly deeper */
+  --color-bg-card:      #FFFFFF; /* Ivory Paper */
+  --color-border:       #D8D4CC; /* Soft Stone */
+  --color-border-muted: #E8E5DE; /* Soft Stone — lighter */
 
-  --color-text:         #1a1e26;
-  --color-text-muted:   #57606a;
-  --color-text-subtle:  #8c959f;
+  /* Text */
+  --color-text:         #1E1E1E; /* Ink Black */
+  --color-text-muted:   #5A5650; /* Ink Black — 60% */
+  --color-text-subtle:  #9A9590; /* Ink Black — 35% */
 
-  --color-accent:       #0969da;
-  --color-accent-hover: #0759ba;
-  --color-accent-muted: #dbeafe;
+  /* Accent — Aged Brass */
+  --color-accent:       #B08D57;
+  --color-accent-hover: #9A7A46; /* Aged Brass — darkened */
+  --color-accent-muted: #F2EAD8; /* Aged Brass — tinted wash */
 
-  --color-tag-bg:       #eef2f7;
-  --color-tag-text:     #476593;
+  /* Tags — Oxide Blue */
+  --color-tag-bg:       #E8EDF2;
+  --color-tag-text:     #3A506B; /* Oxide Blue */
 
-  --color-hero-bg:      #f6f8fa;
-  --color-page-header:  #f6f8fa;
+  /* Section backgrounds */
+  --color-hero-bg:      #F4F1EA;
+  --color-page-header:  #EDE9E1;
 
-  --shadow-card: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.05);
-  --shadow-card-hover: 0 4px 12px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06);
+  /* Shadows — warm-tinted */
+  --shadow-card: 0 1px 3px rgba(30,20,10,0.08), 0 1px 2px rgba(30,20,10,0.05);
+  --shadow-card-hover: 0 4px 12px rgba(30,20,10,0.12), 0 2px 4px rgba(30,20,10,0.07);
 
-  --color-spinner: #0969da;
+  --color-spinner: #B08D57;
 }
 
 /* -------------------------------------------------------
-   3. DARK THEME
-------------------------------------------------------- */
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-bg:           #0d1117;
-    --color-bg-subtle:    #161b22;
-    --color-bg-card:      #161b22;
-    --color-border:       #30363d;
-    --color-border-muted: #21262d;
-
-    --color-text:         #e6edf3;
-    --color-text-muted:   #8d96a0;
-    --color-text-subtle:  #656d76;
-
-    --color-accent:       #58a6ff;
-    --color-accent-hover: #79b8ff;
-    --color-accent-muted: #1c2d45;
-
-    --color-tag-bg:       #1c2d45;
-    --color-tag-text:     #79b8ff;
-
-    --color-hero-bg:      #0d1117;
-    --color-page-header:  #161b22;
-
-    --shadow-card: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
-    --shadow-card-hover: 0 4px 16px rgba(0,0,0,0.5), 0 2px 4px rgba(0,0,0,0.3);
-
-    --color-spinner: #58a6ff;
-  }
-}
-
-/* -------------------------------------------------------
-   4. RESET & BASE
+   3. RESET & BASE
 ------------------------------------------------------- */
 
 *, *::before, *::after {

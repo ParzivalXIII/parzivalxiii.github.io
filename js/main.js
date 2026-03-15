@@ -1,14 +1,22 @@
 /**
  * main.js — Featured repositories for the Home page
  *
- * Fetches the most recently updated public repos for the configured
- * GitHub user, filters forks, and renders cards into #repos.
+ * Fetches repo metadata from the GitHub API for each pinned repo
+ * and renders cards into #repos in the declared order.
  *
- * Configuration: change GITHUB_USERNAME or FEATURED_COUNT below.
+ * Configuration: add/remove repo names in FEATURED_REPOS below.
  */
 
-const GITHUB_USERNAME  = 'ParzivalXIII';
-const FEATURED_COUNT   = 2; // how many repos to show on the home page
+const GITHUB_USERNAME = 'ParzivalXIII';
+
+/**
+ * Pinned repos to feature on the home page.
+ * Cards appear in the order listed here.
+ */
+const FEATURED_REPOS = [
+  'arq-task-planner',
+  'fastapi-starter-kit',
+];
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -60,27 +68,28 @@ function renderRepos(repos, container) {
 
 // ── Fetch ─────────────────────────────────────────────────────────────────────
 
-fetch(`https://api.github.com/users/${GITHUB_USERNAME}/repos?per_page=100&sort=updated`)
-  .then(response => {
-    if (!response.ok) throw new Error(`GitHub API responded with ${response.status}`);
+/**
+ * Fetch a single repo by name from the GitHub API.
+ * @param {string} repoName
+ * @returns {Promise<Object>}
+ */
+function fetchRepo(repoName) {
+  return fetch(
+    `https://api.github.com/repos/${GITHUB_USERNAME}/${encodeURIComponent(repoName)}`,
+    { headers: { Accept: 'application/vnd.github+json' } }
+  ).then(response => {
+    if (!response.ok) throw new Error(`GitHub API responded with ${response.status} for ${repoName}`);
     return response.json();
-  })
-  .then(data => {
+  });
+}
+
+Promise.all(FEATURED_REPOS.map(fetchRepo))
+  .then(repos => {
     const container = document.getElementById('repos');
     const loading   = document.getElementById('featured-loading');
     const error     = document.getElementById('featured-error');
 
     if (loading) loading.hidden = true;
-
-    const repos = data
-      .filter(repo => !repo.fork)
-      .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))
-      .slice(0, FEATURED_COUNT);
-
-    if (repos.length === 0) {
-      container.innerHTML = '<p style="color:var(--color-text-muted)">No public repositories found.</p>';
-      return;
-    }
 
     renderRepos(repos, container);
   })

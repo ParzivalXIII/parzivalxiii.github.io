@@ -60,93 +60,22 @@
         <h2 id="featured-heading" class="section__title">Featured Projects</h2>
         <p class="section__subtitle">A selection of recent work</p>
 
-        <div class="cards-grid">
+        <!-- Loading state -->
+        <div id="featured-loading" class="repos-status__loading" aria-live="polite">
+          <span class="spinner" aria-hidden="true"></span>
+          Loading repositories&hellip;
+        </div>
 
-          <!-- Card 1 -->
-          <article class="card" aria-label="Featured project">
-            <div class="card__body">
-              <div class="card__header">
-                <svg class="card__icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v18H3z"/><path d="M9 9h6v6H9z"/></svg>
-                <h3 class="card__title">langchain-rag-pipeline</h3>
-              </div>
-              <p class="card__description">
-                A retrieval-augmented generation (RAG) pipeline built with LangChain,
-                ChromaDB, and FastAPI. Ingests documents, indexes embeddings, and
-                serves intelligent query responses via a REST API.
-              </p>
-              <div class="card__tags">
-                <span class="tag">Python</span>
-                <span class="tag">LangChain</span>
-                <span class="tag">FastAPI</span>
-              </div>
-            </div>
-            <div class="card__footer">
-              <a
-                href="https://github.com/ParzivalXIII/langchain-rag-pipeline"
-                class="card__link"
-                target="_blank"
-                rel="noopener noreferrer"
-              >View on GitHub &#8599;</a>
-            </div>
-          </article>
+        <!-- Error state -->
+        <div id="featured-error" class="repos-status__error" hidden>
+          <p>
+            Unable to load repositories.
+            <a href="https://github.com/ParzivalXIII?tab=repositories" target="_blank" rel="noopener noreferrer">View on GitHub &#8599;</a>
+          </p>
+        </div>
 
-          <!-- Card 2 -->
-          <article class="card" aria-label="Featured project">
-            <div class="card__body">
-              <div class="card__header">
-                <svg class="card__icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                <h3 class="card__title">fastapi-async-worker</h3>
-              </div>
-              <p class="card__description">
-                Production-ready asynchronous task processing system using FastAPI,
-                ARQ background workers, and Redis. Demonstrates event-driven backend
-                patterns with full observability via structured logging.
-              </p>
-              <div class="card__tags">
-                <span class="tag">Python</span>
-                <span class="tag">ARQ</span>
-                <span class="tag">Redis</span>
-              </div>
-            </div>
-            <div class="card__footer">
-              <a
-                href="https://github.com/ParzivalXIII/fastapi-async-worker"
-                class="card__link"
-                target="_blank"
-                rel="noopener noreferrer"
-              >View on GitHub &#8599;</a>
-            </div>
-          </article>
-
-          <!-- Card 3 -->
-          <article class="card" aria-label="Featured project">
-            <div class="card__body">
-              <div class="card__header">
-                <svg class="card__icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
-                <h3 class="card__title">langgraph-agent-system</h3>
-              </div>
-              <p class="card__description">
-                An agentic workflow orchestration system built with LangGraph.
-                Coordinates multiple LLM agents across structured decision graphs
-                for document analysis, retrieval, and automated reporting.
-              </p>
-              <div class="card__tags">
-                <span class="tag">Python</span>
-                <span class="tag">LangGraph</span>
-                <span class="tag">LangChain</span>
-              </div>
-            </div>
-            <div class="card__footer">
-              <a
-                href="https://github.com/ParzivalXIII/langgraph-agent-system"
-                class="card__link"
-                target="_blank"
-                rel="noopener noreferrer"
-              >View on GitHub &#8599;</a>
-            </div>
-          </article>
-
-        </div><!-- /.cards-grid -->
+        <!-- Cards injected by main.js -->
+        <div id="repos" class="cards-grid" aria-label="Featured repositories"></div>
 
         <div class="section__cta">
           <a href="projects.html" class="btn btn--outline">View All Projects</a>
@@ -183,6 +112,7 @@
     // Footer year
     document.getElementById('footer-year').textContent = new Date().getFullYear();
   </script>
+  <script src="js/main.js"></script>
 
 </body>
 </html>

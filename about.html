@@ -220,26 +220,19 @@
           <div class="lg:col-span-3">
             <div class="space-y-4 text-base text-base-content/70 leading-relaxed">
               <p>
-                I am a backend developer focused on building reliable, production-oriented systems
-                with Python. My work centers on API-driven architectures, asynchronous services,
-                and AI-powered backend systems.
+                I am a Python backend engineer focused on building the reliable infrastructure that powers AI applications. My work bridges the gap between experimental AI and production-ready systems, specializing in FastAPI, asynchronous services, and scalable API architectures.
               </p>
               <p>
-                I primarily develop backend services using FastAPI and Python, emphasizing modular
-                architecture, database design, and scalable service patterns. My projects typically
-                integrate modern AI tooling such as LLM orchestration frameworks, vector databases,
-                and automated workflows.
+                I focus on building the underlying systems that enable AI agents to function effectively in production, managing state (SQLModel/Postgres), handling concurrency, orchestrating background tasks (Redis/ARQ), and developing robust data retrieval pipelines.
               </p>
-              <p>My development approach prioritizes:</p>
+              <p>My engineering approach is highly pragmatic:</p>
               <ul class="list-disc pl-5 space-y-1">
-                <li>clear system architecture</li>
-                <li>maintainable codebases</li>
-                <li>observable and testable services</li>
-                <li>automation of complex workflows</li>
+                <li><strong>Walking skeletons first:</strong> I build the smallest end-to-end version that proves the architecture works before adding edge cases or complexity.</li>
+                <li><strong>Incremental &amp; testable:</strong> I prefer small, testable diffs over massive rewrites, and I write tests alongside core logic.</li>
+                <li><strong>First-principles thinking:</strong> I question assumptions to avoid patching symptoms, and I proactively surface architectural tradeoffs early.</li>
               </ul>
               <p>
-                Most of my projects explore practical applications of AI systems, including document
-                retrieval pipelines, agent-driven workflows, and intelligent decision-support tools.
+                While my foundation is strict backend engineering, my recent projects apply these patterns to practical AI use cases, including RAG pipelines, autonomous agent workflows, and intelligent decision-support tools.
               </p>
             </div>
           </div>
@@ -340,33 +333,33 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div class="border-l-4 border-accent pl-5 py-4">
-            <h3 class="font-bold text-lg mb-2">Agentic AI Systems</h3>
+            <h3 class="font-bold text-lg mb-2">Agentic Workflows</h3>
             <p class="text-sm text-base-content/60 leading-relaxed">
-              Designing systems where LLMs coordinate tasks such as retrieval, analysis, and decision-making across structured workflows.
-            </p>
-          </div>
-          <div class="border-l-4 border-accent pl-5 py-4">
-            <h3 class="font-bold text-lg mb-2">RAG Infrastructure</h3>
-            <p class="text-sm text-base-content/60 leading-relaxed">
-              Developing retrieval pipelines capable of ingesting, indexing, and querying document collections for AI-assisted applications.
+              Architecting stateful, multi-step agent workflows where LLMs execute structured tasks, invoke external tools, and manage complex decision loops reliably.
             </p>
           </div>
           <div class="border-l-4 border-accent pl-5 py-4">
             <h3 class="font-bold text-lg mb-2">Event-Driven Backends</h3>
             <p class="text-sm text-base-content/60 leading-relaxed">
-              Implementing asynchronous services that rely on background workers, message queues, and distributed task processing.
+              Building asynchronous FastAPI services decoupled by message queues (Redis/ARQ) to handle high-throughput, distributed task processing without blocking the main thread.
             </p>
           </div>
           <div class="border-l-4 border-accent pl-5 py-4">
             <h3 class="font-bold text-lg mb-2">Production-Oriented System Design</h3>
             <p class="text-sm text-base-content/60 leading-relaxed">
-              Building systems that prioritize reliability, observability, and modular architecture suitable for real-world deployment.
+              Designing modular, highly observable backend architectures that prioritize reliability, built incrementally using testable, production-grade patterns.
+            </p>
+          </div>
+          <div class="border-l-4 border-accent pl-5 py-4">
+            <h3 class="font-bold text-lg mb-2">Tool Integration &amp; API Design</h3>
+            <p class="text-sm text-base-content/60 leading-relaxed">
+              Building the robust FastAPI endpoints, strict Pydantic schemas, and structured tool definitions that allow AI agents to safely and reliably interact with external systems and databases.
             </p>
           </div>
         </div>
 
-        <p class="mt-8 text-sm text-base-content/40 italic">
-          Many of my current projects explore how AI agents can augment operational systems such as inventory monitoring, workflow orchestration, and developer tooling.
+        <p class="mt-8 text-sm text-base-content/60 leading-relaxed">
+          I apply these patterns to build production-grade, AI-augmented systems that automate real-world workflows, specifically in inventory monitoring, task orchestration, and developer tooling.
         </p>
       </section>
 

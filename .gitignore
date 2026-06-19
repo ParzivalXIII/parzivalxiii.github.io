@@ -1,0 +1,24 @@
+# ── Sisyphus workflow artifacts ──
+.sisyphus/
+
+# ── OS files ──
+.DS_Store
+.DS_Store?
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ── Editor / IDE ──
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-*
+
+# ── Vercel (if deployed separately) ──
+.vercel
+
+# --- User ---
+.playwright-mcp

@@ -1,227 +1,399 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="luxury">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="About Parzival &mdash; Backend Developer & Applied AI Engineer. Background, technology stack, and current focus." />
+  <meta name="description" content="About Parzival — Backend Developer & Applied AI Engineer. Background, technology stack, and current focus." />
   <title>About &mdash; Parzival</title>
-  <link rel="stylesheet" href="css/styles.css" />
+
+  <!-- ⚡ BLOCKING THEME SCRIPT -->
+  <script>
+    (function() {
+      var theme = localStorage.getItem('theme');
+      var html = document.documentElement;
+      if (theme === 'light') {
+        html.setAttribute('data-theme', 'winter');
+      } else if (theme === 'dark') {
+        html.setAttribute('data-theme', 'luxury');
+      } else if (theme === 'system' || !theme) {
+        html.setAttribute('data-theme',
+          window.matchMedia('(prefers-color-scheme: dark)').matches ? 'luxury' : 'winter'
+        );
+      }
+    })();
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3"></script>
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@5.5" rel="stylesheet" type="text/css" />
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@5.5/themes.css" rel="stylesheet" type="text/css" />
+  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.15/dist/cdn.min.js" defer></script>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&display=swap" rel="stylesheet" />
+
+  <style>
+    @theme {
+      --font-family-sans: "Fira Code", monospace;
+    }
+
+    html {
+      font-family: "Fira Code", monospace;
+      scroll-behavior: smooth;
+    }
+
+    :focus-visible {
+      outline: 2px solid oklch(0.7 0.15 70);
+      outline-offset: 3px;
+      border-radius: 4px;
+    }
+
+    @keyframes accent-glow {
+      0%, 100% { box-shadow: 0 0 5px oklch(0.7 0.15 70); }
+      50%      { box-shadow: 0 0 20px oklch(0.7 0.15 70), 0 0 40px oklch(0.7 0.15 70 / 0.3); }
+    }
+
+    .gradient-text {
+      background: linear-gradient(135deg, oklch(0.7 0.15 70), oklch(0.55 0.18 30));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      html {
+        scroll-behavior: auto;
+      }
+    }
+  </style>
+
+  <script>
+    document.addEventListener('alpine:init', function() {
+      Alpine.store('theme', {
+        mode: 'dark',
+        init: function() {
+          var saved = localStorage.getItem('theme');
+          if (saved) { this.mode = saved; }
+          else { this.mode = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; }
+          this.applyTheme();
+          var self = this;
+          window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+            if (self.mode === 'system') { self.applyTheme(); }
+          });
+        },
+        toggle: function() {
+          var modes = ['dark', 'light', 'system'];
+          var idx = modes.indexOf(this.mode);
+          this.mode = modes[(idx + 1) % modes.length];
+          this.applyTheme();
+          localStorage.setItem('theme', this.mode);
+        },
+        applyTheme: function() {
+          var html = document.documentElement;
+          if (this.mode === 'dark') html.setAttribute('data-theme', 'luxury');
+          else if (this.mode === 'light') html.setAttribute('data-theme', 'winter');
+          else if (this.mode === 'system') html.setAttribute('data-theme',
+            window.matchMedia('(prefers-color-scheme: dark)').matches ? 'luxury' : 'winter');
+        }
+      });
+
+      Alpine.store('github', {
+        repos: [],
+        featured: [],
+        loading: true,
+        error: null,
+        username: 'ParzivalXIII',
+        featuredRepoNames: ['arq-task-planner', 'fastapi-starter-kit'],
+        cacheTTL: 5 * 60 * 1000,
+        fetchRepos: function() {
+          this.loading = true; this.error = null;
+          var cached = this._getCache('all-repos');
+          if (cached) { this.repos = cached; this.loading = false; return; }
+          var self = this;
+          fetch('https://api.github.com/users/' + this.username + '/repos?per_page=100&sort=updated')
+            .then(function(r) { if (!r.ok) throw new Error('GitHub API responded with ' + r.status); return r.json(); })
+            .then(function(data) { self.repos = data; self._setCache('all-repos', data); self.loading = false; })
+            .catch(function(err) { self.error = err.message; self.loading = false; console.error('Failed to fetch repos:', err); });
+        },
+        fetchFeaturedRepos: function() {
+          this.loading = true; this.error = null;
+          var cached = this._getCache('featured-repos');
+          if (cached) { this.featured = cached; this.loading = false; return; }
+          var self = this;
+          var promises = this.featuredRepoNames.map(function(name) {
+            return fetch('https://api.github.com/repos/' + self.username + '/' + encodeURIComponent(name), { headers: { Accept: 'application/vnd.github+json' } })
+              .then(function(r) { if (!r.ok) throw new Error('Failed to fetch ' + name); return r.json(); });
+          });
+          Promise.allSettled(promises)
+            .then(function(results) {
+              var repos = results.filter(function(r) { return r.status === 'fulfilled'; }).map(function(r) { return r.value; });
+              self.featured = repos;
+              self._setCache('featured-repos', repos);
+              self.loading = false;
+            })
+            .catch(function(err) { self.error = err.message; self.loading = false; console.error('Failed to fetch featured repos:', err); });
+        },
+        _getCache: function(key) {
+          try {
+            var item = localStorage.getItem('github-' + key);
+            if (!item) return null;
+            var parsed = JSON.parse(item);
+            if (Date.now() - parsed.timestamp > this.cacheTTL) { localStorage.removeItem('github-' + key); return null; }
+            return parsed.data;
+          } catch(e) { return null; }
+        },
+        _setCache: function(key, data) {
+          try { localStorage.setItem('github-' + key, JSON.stringify({ data: data, timestamp: Date.now() })); }
+          catch(e) {}
+        }
+      });
+    });
+  </script>
 </head>
 <body>
 
   <!-- ======= NAVBAR ======= -->
-  <header class="navbar">
-    <div class="container navbar__inner">
-      <a href="index.html" class="navbar__brand">Parzival</a>
-      <button class="navbar__toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="nav-menu">
-        <span class="navbar__toggle-bar"></span>
-        <span class="navbar__toggle-bar"></span>
-        <span class="navbar__toggle-bar"></span>
-      </button>
-      <nav id="nav-menu" class="navbar__menu" role="navigation">
-        <ul class="navbar__list">
-          <li><a href="index.html" class="navbar__link">Home</a></li>
-          <li><a href="projects.html" class="navbar__link">Projects</a></li>
-          <li><a href="about.html" class="navbar__link navbar__link--active">About</a></li>
-          <li>
-            <a
-              href="https://github.com/ParzivalXIII"
-              class="navbar__link navbar__link--cta"
-              target="_blank"
-              rel="noopener noreferrer"
-            >GitHub &#8599;</a>
-          </li>
+  <header id="navbar" class="sticky top-0 z-50" x-data="{ open: false }">
+    <div class="navbar bg-base-100 border-b border-base-300">
+      <div class="navbar-start">
+        <div class="dropdown">
+          <button class="btn btn-ghost lg:hidden" type="button" aria-label="Toggle navigation" @click="open = !open" @click.away="open = false">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+          <ul class="menu menu-sm dropdown-content mt-3 z-50 p-2 shadow bg-base-100 rounded-box w-52"
+            x-show="open"
+            x-transition:enter="transition ease-out duration-150"
+            x-transition:enter-start="opacity-0 scale-95"
+            x-transition:enter-end="opacity-100 scale-100"
+            x-transition:leave="transition ease-in duration-100"
+            x-transition:leave-start="opacity-100 scale-100"
+            x-transition:leave-end="opacity-0 scale-95"
+            @click="open = false"
+          >
+            <li><a href="index.html">Home</a></li>
+            <li><a href="projects.html">Projects</a></li>
+            <li><a href="about.html" class="active" aria-current="page">About</a></li>
+            <li>
+              <a href="https://github.com/ParzivalXIII" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                GitHub
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="navbar-center hidden lg:flex">
+        <ul class="menu menu-horizontal px-1 gap-1">
+          <li><a href="index.html" class="font-medium">Home</a></li>
+          <li><a href="projects.html" class="font-medium">Projects</a></li>
+          <li><a href="about.html" class="font-medium active" aria-current="page">About</a></li>
         </ul>
-      </nav>
+      </div>
+      <div class="navbar-end gap-2">
+        <a href="https://github.com/ParzivalXIII" target="_blank" rel="noopener noreferrer" class="btn btn-ghost btn-sm hidden lg:inline-flex" aria-label="GitHub profile">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+        </a>
+        <button class="btn btn-ghost btn-sm" type="button" @click="Alpine.store('theme').toggle()" x-bind:aria-label="'Theme: ' + Alpine.store('theme').mode">
+          <svg x-show="Alpine.store('theme').mode === 'dark'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <svg x-show="Alpine.store('theme').mode === 'light'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          <svg x-show="Alpine.store('theme').mode === 'system'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><path d="M8 21h8M12 17v4"/></svg>
+        </button>
+      </div>
     </div>
   </header>
 
+  <!-- ======= MAIN CONTENT ======= -->
   <main>
+    <div class="max-w-5xl mx-auto px-5 py-12">
 
-    <!-- ======= PAGE HEADER ======= -->
-    <section class="page-header" aria-labelledby="page-title">
-      <div class="container">
-        <h1 id="page-title" class="page-header__title">About</h1>
-        <p class="page-header__subtitle">Background, technology stack, and current focus.</p>
-      </div>
-    </section>
+      <!-- Page header -->
+      <h1 class="text-4xl md:text-5xl font-black tracking-tighter mb-8">About</h1>
 
-    <!-- ======= BACKGROUND ======= -->
-    <section class="section" aria-labelledby="background-heading">
-      <div class="container about-layout">
-
-        <article class="about-section">
-          <h2 id="background-heading" class="about-section__title">Background</h2>
-          <div class="about-section__content prose">
-            <p>
-              I am a backend developer focused on building reliable, production-oriented systems
-              with Python. My work centers on API-driven architectures, asynchronous services,
-              and AI-powered backend systems.
-            </p>
-            <p>
-              I primarily develop backend services using FastAPI and Python, emphasizing modular
-              architecture, database design, and scalable service patterns. My projects typically
-              integrate modern AI tooling such as LLM orchestration frameworks, vector databases,
-              and automated workflows.
-            </p>
-            <p>My development approach prioritizes:</p>
-            <ul>
-              <li>clear system architecture</li>
-              <li>maintainable codebases</li>
-              <li>observable and testable services</li>
-              <li>automation of complex workflows</li>
-            </ul>
-            <p>
-              Most of my projects explore practical applications of AI systems, including document
-              retrieval pipelines, agent-driven workflows, and intelligent decision-support tools.
-            </p>
+      <!-- ======= Background / Bio ======= -->
+      <section class="mb-16" aria-labelledby="bio-heading">
+        <h2 id="bio-heading" class="text-2xl font-bold tracking-tight mb-6 pb-3 border-b border-base-300">Background</h2>
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+          <div class="lg:col-span-3">
+            <div class="space-y-4 text-base text-base-content/70 leading-relaxed">
+              <p>
+                I am a backend developer focused on building reliable, production-oriented systems
+                with Python. My work centers on API-driven architectures, asynchronous services,
+                and AI-powered backend systems.
+              </p>
+              <p>
+                I primarily develop backend services using FastAPI and Python, emphasizing modular
+                architecture, database design, and scalable service patterns. My projects typically
+                integrate modern AI tooling such as LLM orchestration frameworks, vector databases,
+                and automated workflows.
+              </p>
+              <p>My development approach prioritizes:</p>
+              <ul class="list-disc pl-5 space-y-1">
+                <li>clear system architecture</li>
+                <li>maintainable codebases</li>
+                <li>observable and testable services</li>
+                <li>automation of complex workflows</li>
+              </ul>
+              <p>
+                Most of my projects explore practical applications of AI systems, including document
+                retrieval pipelines, agent-driven workflows, and intelligent decision-support tools.
+              </p>
+            </div>
           </div>
-        </article>
-
-        <!-- ======= TECHNOLOGY STACK ======= -->
-        <article class="about-section">
-          <h2 id="stack-heading" class="about-section__title">Technology Stack</h2>
-          <p class="about-section__intro">
-            My work focuses on a Python-centric backend ecosystem with supporting infrastructure
-            for AI systems and distributed services.
-          </p>
-
-          <div class="stack-grid">
-
-            <div class="stack-group">
-              <h3 class="stack-group__title">Backend Development</h3>
-              <ul class="stack-list">
-                <li>Python</li>
-                <li>FastAPI</li>
-                <li>async / await patterns</li>
-                <li>REST API architecture</li>
-              </ul>
+          <div class="lg:col-span-2">
+            <div class="mockup-code bg-base-300 text-base-content shadow-md">
+              <div class="px-6 py-1">
+                <pre><span class="text-accent">$</span> <span class="text-primary">whoami</span></pre>
+                <pre><span class="text-base-content/80">  Parzival</span></pre>
+                <pre><span class="text-accent">$</span> <span class="text-primary">cat</span> <span class="text-secondary">/etc/role</span></pre>
+                <pre><span class="text-base-content/80">  Backend Developer &amp; Applied AI Engineer</span></pre>
+                <pre><span class="text-accent">$</span> <span class="text-primary">echo</span> <span class="text-warning">$STACK</span></pre>
+                <pre><span class="text-base-content/80">  Python · FastAPI · LangChain · Docker · PostgreSQL</span></pre>
+              </div>
             </div>
-
-            <div class="stack-group">
-              <h3 class="stack-group__title">Data &amp; Storage</h3>
-              <ul class="stack-list">
-                <li>PostgreSQL</li>
-                <li>Redis</li>
-                <li>SQLModel (ORM)</li>
-              </ul>
-            </div>
-
-            <div class="stack-group">
-              <h3 class="stack-group__title">Agentic &amp; LLM Systems</h3>
-              <ul class="stack-list">
-                <li>LangChain</li>
-                <li>LangGraph</li>
-                <li>Retrieval-Augmented Generation (RAG)</li>
-                <li>Qdrant</li>
-                <li>ChromaDB</li>
-              </ul>
-            </div>
-
-            <div class="stack-group">
-              <h3 class="stack-group__title">Infrastructure &amp; DevOps</h3>
-              <ul class="stack-list">
-                <li>Docker</li>
-                <li>Docker Compose</li>
-                <li>Background workers (ARQ)</li>
-                <li>Caching with Redis</li>
-              </ul>
-            </div>
-
-            <div class="stack-group">
-              <h3 class="stack-group__title">Development Tools</h3>
-              <ul class="stack-list">
-                <li>Git / GitHub</li>
-                <li>VSCode</li>
-                <li>Logging with Loguru</li>
-                <li>API testing with Postman / curl</li>
-              </ul>
-            </div>
-
           </div>
-        </article>
+        </div>
+      </section>
 
-        <!-- ======= CURRENT FOCUS ======= -->
-        <article class="about-section">
-          <h2 id="focus-heading" class="about-section__title">Current Focus</h2>
-          <p class="about-section__intro">
-            My current work focuses on building AI-enhanced backend systems and agentic workflows.
-            Areas I am actively developing expertise in include:
-          </p>
+      <!-- ======= Tech Stack ======= -->
+      <section class="mb-16" aria-labelledby="stack-heading">
+        <h2 id="stack-heading" class="text-2xl font-bold tracking-tight mb-2">Technology Stack</h2>
+        <p class="text-base text-base-content/60 mb-8">A Python-centric backend ecosystem with supporting infrastructure for AI systems and distributed services.</p>
 
-          <div class="focus-grid">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 
-            <div class="focus-item">
-              <h3 class="focus-item__title">Agentic AI Systems</h3>
-              <p class="focus-item__desc">
-                Designing systems where LLMs coordinate tasks such as retrieval, analysis, and
-                decision-making across structured workflows.
-              </p>
+          <!-- Backend Development -->
+          <div class="card bg-base-200/50 border border-base-300">
+            <div class="card-body">
+              <h3 class="card-title text-sm uppercase tracking-wider text-accent mb-3">Backend Development</h3>
+              <div class="flex flex-wrap gap-2">
+                <span class="badge badge-outline">Python</span>
+                <span class="badge badge-outline">FastAPI</span>
+                <span class="badge badge-outline">async/await</span>
+                <span class="badge badge-outline">REST API</span>
+              </div>
             </div>
-
-            <div class="focus-item">
-              <h3 class="focus-item__title">RAG Infrastructure</h3>
-              <p class="focus-item__desc">
-                Developing retrieval pipelines capable of ingesting, indexing, and querying
-                document collections for AI-assisted applications.
-              </p>
-            </div>
-
-            <div class="focus-item">
-              <h3 class="focus-item__title">Event-Driven Backends</h3>
-              <p class="focus-item__desc">
-                Implementing asynchronous services that rely on background workers, message
-                queues, and distributed task processing.
-              </p>
-            </div>
-
-            <div class="focus-item">
-              <h3 class="focus-item__title">Production-Oriented System Design</h3>
-              <p class="focus-item__desc">
-                Building systems that prioritize reliability, observability, and modular
-                architecture suitable for real-world deployment.
-              </p>
-            </div>
-
           </div>
 
-          <p class="about-section__note">
-            Many of my current projects explore how AI agents can augment operational systems
-            such as inventory monitoring, workflow orchestration, and developer tooling.
-          </p>
-        </article>
+          <!-- Data & Storage -->
+          <div class="card bg-base-200/50 border border-base-300">
+            <div class="card-body">
+              <h3 class="card-title text-sm uppercase tracking-wider text-accent mb-3">Data &amp; Storage</h3>
+              <div class="flex flex-wrap gap-2">
+                <span class="badge badge-outline">PostgreSQL</span>
+                <span class="badge badge-outline">Redis</span>
+                <span class="badge badge-outline">SQLModel</span>
+              </div>
+            </div>
+          </div>
 
-      </div><!-- /.about-layout -->
-    </section>
+          <!-- Agentic & LLM Systems -->
+          <div class="card bg-base-200/50 border border-base-300">
+            <div class="card-body">
+              <h3 class="card-title text-sm uppercase tracking-wider text-accent mb-3">Agentic &amp; LLM</h3>
+              <div class="flex flex-wrap gap-2">
+                <span class="badge badge-outline">LangChain</span>
+                <span class="badge badge-outline">LangGraph</span>
+                <span class="badge badge-outline">RAG</span>
+                <span class="badge badge-outline">Qdrant</span>
+                <span class="badge badge-outline">ChromaDB</span>
+              </div>
+            </div>
+          </div>
 
+          <!-- Infrastructure & DevOps -->
+          <div class="card bg-base-200/50 border border-base-300">
+            <div class="card-body">
+              <h3 class="card-title text-sm uppercase tracking-wider text-accent mb-3">Infrastructure</h3>
+              <div class="flex flex-wrap gap-2">
+                <span class="badge badge-outline">Docker</span>
+                <span class="badge badge-outline">Docker Compose</span>
+                <span class="badge badge-outline">ARQ</span>
+                <span class="badge badge-outline">Redis Cache</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Development Tools -->
+          <div class="card bg-base-200/50 border border-base-300">
+            <div class="card-body">
+              <h3 class="card-title text-sm uppercase tracking-wider text-accent mb-3">Dev Tools</h3>
+              <div class="flex flex-wrap gap-2">
+                <span class="badge badge-outline">Git/GitHub</span>
+                <span class="badge badge-outline">VS Code</span>
+                <span class="badge badge-outline">Loguru</span>
+                <span class="badge badge-outline">Postman/curl</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ======= Current Focus ======= -->
+      <section aria-labelledby="focus-heading">
+        <h2 id="focus-heading" class="text-2xl font-bold tracking-tight mb-2">Current Focus</h2>
+        <p class="text-base text-base-content/60 mb-8">Building AI-enhanced backend systems and agentic workflows.</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div class="border-l-4 border-accent pl-5 py-4">
+            <h3 class="font-bold text-lg mb-2">Agentic AI Systems</h3>
+            <p class="text-sm text-base-content/60 leading-relaxed">
+              Designing systems where LLMs coordinate tasks such as retrieval, analysis, and decision-making across structured workflows.
+            </p>
+          </div>
+          <div class="border-l-4 border-accent pl-5 py-4">
+            <h3 class="font-bold text-lg mb-2">RAG Infrastructure</h3>
+            <p class="text-sm text-base-content/60 leading-relaxed">
+              Developing retrieval pipelines capable of ingesting, indexing, and querying document collections for AI-assisted applications.
+            </p>
+          </div>
+          <div class="border-l-4 border-accent pl-5 py-4">
+            <h3 class="font-bold text-lg mb-2">Event-Driven Backends</h3>
+            <p class="text-sm text-base-content/60 leading-relaxed">
+              Implementing asynchronous services that rely on background workers, message queues, and distributed task processing.
+            </p>
+          </div>
+          <div class="border-l-4 border-accent pl-5 py-4">
+            <h3 class="font-bold text-lg mb-2">Production-Oriented System Design</h3>
+            <p class="text-sm text-base-content/60 leading-relaxed">
+              Building systems that prioritize reliability, observability, and modular architecture suitable for real-world deployment.
+            </p>
+          </div>
+        </div>
+
+        <p class="mt-8 text-sm text-base-content/40 italic">
+          Many of my current projects explore how AI agents can augment operational systems such as inventory monitoring, workflow orchestration, and developer tooling.
+        </p>
+      </section>
+
+    </div>
   </main>
 
   <!-- ======= FOOTER ======= -->
-  <footer class="footer">
-    <div class="container footer__inner">
-      <p class="footer__copy">&copy; <span id="footer-year"></span> Parzival. Built with HTML, CSS &amp; JavaScript.</p>
-      <a
-        href="https://github.com/ParzivalXIII"
-        class="footer__link"
-        target="_blank"
-        rel="noopener noreferrer"
-      >GitHub</a>
+  <footer class="footer footer-horizontal footer-center sm:footer-horizontal bg-base-200 border-t border-base-300 p-6 mt-auto">
+    <div class="w-full max-w-5xl flex flex-col sm:flex-row items-center justify-between gap-2">
+      <p class="text-sm text-base-content/60">
+        &copy; <span x-text="new Date().getFullYear()"></span> Parzival. All rights reserved.
+      </p>
+      <a href="https://github.com/ParzivalXIII" target="_blank" rel="noopener noreferrer" class="text-sm text-base-content/60 hover:text-primary transition-colors inline-flex items-center gap-1">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+        GitHub
+      </a>
     </div>
   </footer>
 
-  <script>
-    // Navbar mobile toggle
-    const toggle = document.querySelector('.navbar__toggle');
-    const menu   = document.querySelector('.navbar__menu');
-    toggle.addEventListener('click', () => {
-      const expanded = toggle.getAttribute('aria-expanded') === 'true';
-      toggle.setAttribute('aria-expanded', String(!expanded));
-      menu.classList.toggle('navbar__menu--open');
-    });
-
-    // Footer year
-    document.getElementById('footer-year').textContent = new Date().getFullYear();
-  </script>
+  <noscript>
+    <div class="fixed inset-0 z-[9999] flex items-center justify-center bg-base-100 p-8">
+      <div class="text-center max-w-md">
+        <p class="text-lg font-bold mb-2">JavaScript is required</p>
+        <p class="text-sm text-base-content/60">This portfolio uses JavaScript for theme switching and GitHub API integration. Please enable JavaScript to view this site.</p>
+      </div>
+    </div>
+  </noscript>
 
 </body>
 </html>

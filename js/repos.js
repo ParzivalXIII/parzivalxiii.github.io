@@ -1,6 +1,10 @@
 /**
- * repos.js — GitHub API integration for the Projects page
- *
+ * repos.js — GitHub API integration for the Projects page (ARCHIVED)
+ * ==================================================================
+ * This file is no longer referenced by any HTML page.
+ * The portfolio now uses Alpine.js stores for GitHub API
+ * integration with localStorage caching (5-min TTL).
+ * ------------------------------------------------------------------
  * Fetches public repositories for a GitHub user, filters forks,
  * sorts by most recently updated, and renders cards into the DOM.
  *

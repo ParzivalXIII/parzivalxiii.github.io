@@ -1,111 +1,382 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="luxury">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="All GitHub repositories by Parzival — Backend Developer & Applied AI Engineer." />
   <title>Projects &mdash; Parzival</title>
-  <link rel="stylesheet" href="css/styles.css" />
+
+  <!-- ⚡ BLOCKING THEME SCRIPT -->
+  <script>
+    (function() {
+      var theme = localStorage.getItem('theme');
+      var html = document.documentElement;
+      if (theme === 'light') {
+        html.setAttribute('data-theme', 'winter');
+      } else if (theme === 'dark') {
+        html.setAttribute('data-theme', 'luxury');
+      } else if (theme === 'system' || !theme) {
+        html.setAttribute('data-theme',
+          window.matchMedia('(prefers-color-scheme: dark)').matches ? 'luxury' : 'winter'
+        );
+      }
+    })();
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3"></script>
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@5.5" rel="stylesheet" type="text/css" />
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@5.5/themes.css" rel="stylesheet" type="text/css" />
+  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.15/dist/cdn.min.js" defer></script>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&display=swap" rel="stylesheet" />
+
+  <style>
+    @theme {
+      --font-family-sans: "Fira Code", monospace;
+    }
+
+    html {
+      font-family: "Fira Code", monospace;
+      scroll-behavior: smooth;
+    }
+
+    :focus-visible {
+      outline: 2px solid oklch(0.7 0.15 70);
+      outline-offset: 3px;
+      border-radius: 4px;
+    }
+
+    @keyframes accent-glow {
+      0%, 100% { box-shadow: 0 0 5px oklch(0.7 0.15 70); }
+      50%      { box-shadow: 0 0 20px oklch(0.7 0.15 70), 0 0 40px oklch(0.7 0.15 70 / 0.3); }
+    }
+
+    .gradient-text {
+      background: linear-gradient(135deg, oklch(0.7 0.15 70), oklch(0.55 0.18 30));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .lang-dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      html {
+        scroll-behavior: auto;
+      }
+    }
+  </style>
+
+  <script>
+    document.addEventListener('alpine:init', function() {
+      Alpine.store('theme', {
+        mode: 'dark',
+        init: function() {
+          var saved = localStorage.getItem('theme');
+          if (saved) { this.mode = saved; }
+          else { this.mode = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; }
+          this.applyTheme();
+          var self = this;
+          window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+            if (self.mode === 'system') { self.applyTheme(); }
+          });
+        },
+        toggle: function() {
+          var modes = ['dark', 'light', 'system'];
+          var idx = modes.indexOf(this.mode);
+          this.mode = modes[(idx + 1) % modes.length];
+          this.applyTheme();
+          localStorage.setItem('theme', this.mode);
+        },
+        applyTheme: function() {
+          var html = document.documentElement;
+          if (this.mode === 'dark') html.setAttribute('data-theme', 'luxury');
+          else if (this.mode === 'light') html.setAttribute('data-theme', 'winter');
+          else if (this.mode === 'system') html.setAttribute('data-theme',
+            window.matchMedia('(prefers-color-scheme: dark)').matches ? 'luxury' : 'winter');
+        }
+      });
+
+      Alpine.store('github', {
+        repos: [],
+        featured: [],
+        loading: true,
+        error: null,
+        username: 'ParzivalXIII',
+        featuredRepoNames: ['arq-task-planner', 'fastapi-starter-kit'],
+        cacheTTL: 5 * 60 * 1000,
+        fetchRepos: function() {
+          this.loading = true;
+          this.error = null;
+          var cached = this._getCache('all-repos');
+          if (cached) { this.repos = cached; this.loading = false; return; }
+          var self = this;
+          fetch('https://api.github.com/users/' + this.username + '/repos?per_page=100&sort=updated')
+            .then(function(r) { if (!r.ok) throw new Error('GitHub API responded with ' + r.status); return r.json(); })
+            .then(function(data) { self.repos = data; self._setCache('all-repos', data); self.loading = false; })
+            .catch(function(err) { self.error = err.message; self.loading = false; console.error('Failed to fetch repos:', err); });
+        },
+        fetchFeaturedRepos: function() {
+          this.loading = true;
+          this.error = null;
+          var cached = this._getCache('featured-repos');
+          if (cached) { this.featured = cached; this.loading = false; return; }
+          var self = this;
+          var promises = this.featuredRepoNames.map(function(name) {
+            return fetch('https://api.github.com/repos/' + self.username + '/' + encodeURIComponent(name), { headers: { Accept: 'application/vnd.github+json' } })
+              .then(function(r) { if (!r.ok) throw new Error('Failed to fetch ' + name); return r.json(); });
+          });
+          Promise.allSettled(promises)
+            .then(function(results) {
+              var repos = results.filter(function(r) { return r.status === 'fulfilled'; }).map(function(r) { return r.value; });
+              self.featured = repos;
+              self._setCache('featured-repos', repos);
+              self.loading = false;
+            })
+            .catch(function(err) { self.error = err.message; self.loading = false; console.error('Failed to fetch featured repos:', err); });
+        },
+        _getCache: function(key) {
+          try {
+            var item = localStorage.getItem('github-' + key);
+            if (!item) return null;
+            var parsed = JSON.parse(item);
+            if (Date.now() - parsed.timestamp > this.cacheTTL) { localStorage.removeItem('github-' + key); return null; }
+            return parsed.data;
+          } catch(e) { return null; }
+        },
+        _setCache: function(key, data) {
+          try { localStorage.setItem('github-' + key, JSON.stringify({ data: data, timestamp: Date.now() })); }
+          catch(e) {}
+        }
+      });
+    });
+  </script>
 </head>
 <body>
 
   <!-- ======= NAVBAR ======= -->
-  <header class="navbar">
-    <div class="container navbar__inner">
-      <a href="index.html" class="navbar__brand">Parzival</a>
-      <button class="navbar__toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="nav-menu">
-        <span class="navbar__toggle-bar"></span>
-        <span class="navbar__toggle-bar"></span>
-        <span class="navbar__toggle-bar"></span>
-      </button>
-      <nav id="nav-menu" class="navbar__menu" role="navigation">
-        <ul class="navbar__list">
-          <li><a href="index.html" class="navbar__link">Home</a></li>
-          <li><a href="projects.html" class="navbar__link navbar__link--active">Projects</a></li>
-          <li><a href="about.html" class="navbar__link">About</a></li>
-          <li>
-            <a
-              href="https://github.com/ParzivalXIII"
-              class="navbar__link navbar__link--cta"
-              target="_blank"
-              rel="noopener noreferrer"
-            >GitHub &#8599;</a>
-          </li>
+  <header id="navbar" class="sticky top-0 z-50" x-data="{ open: false }">
+    <div class="navbar bg-base-100 border-b border-base-300">
+      <div class="navbar-start">
+        <div class="dropdown">
+          <button class="btn btn-ghost lg:hidden" type="button" aria-label="Toggle navigation" @click="open = !open" @click.away="open = false">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+          <ul class="menu menu-sm dropdown-content mt-3 z-50 p-2 shadow bg-base-100 rounded-box w-52"
+            x-show="open"
+            x-transition:enter="transition ease-out duration-150"
+            x-transition:enter-start="opacity-0 scale-95"
+            x-transition:enter-end="opacity-100 scale-100"
+            x-transition:leave="transition ease-in duration-100"
+            x-transition:leave-start="opacity-100 scale-100"
+            x-transition:leave-end="opacity-0 scale-95"
+            @click="open = false"
+          >
+            <li><a href="index.html">Home</a></li>
+            <li><a href="projects.html" class="active" aria-current="page">Projects</a></li>
+            <li><a href="about.html">About</a></li>
+            <li>
+              <a href="https://github.com/ParzivalXIII" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                GitHub
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="navbar-center hidden lg:flex">
+        <ul class="menu menu-horizontal px-1 gap-1">
+          <li><a href="index.html" class="font-medium">Home</a></li>
+          <li><a href="projects.html" class="font-medium active" aria-current="page">Projects</a></li>
+          <li><a href="about.html" class="font-medium">About</a></li>
         </ul>
-      </nav>
+      </div>
+      <div class="navbar-end gap-2">
+        <a href="https://github.com/ParzivalXIII" target="_blank" rel="noopener noreferrer" class="btn btn-ghost btn-sm hidden lg:inline-flex" aria-label="GitHub profile">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+        </a>
+        <button class="btn btn-ghost btn-sm" type="button" @click="Alpine.store('theme').toggle()" x-bind:aria-label="'Theme: ' + Alpine.store('theme').mode">
+          <svg x-show="Alpine.store('theme').mode === 'dark'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <svg x-show="Alpine.store('theme').mode === 'light'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          <svg x-show="Alpine.store('theme').mode === 'system'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><path d="M8 21h8M12 17v4"/></svg>
+        </button>
+      </div>
     </div>
   </header>
 
-  <main>
+  <!-- ======= MAIN CONTENT ======= -->
+  <main
+    x-init="Alpine.store('github').fetchRepos()"
+    x-data="{
+      search: '',
+      languageFilter: '',
+      sortBy: 'updated',
+      get repos() {
+        var all = Alpine.store('github').repos;
+        // Exclude portfolio repo
+        var filtered = all.filter(function(r) { return r.name.toLowerCase() !== 'parzivalxiii.github.io'; });
+        // Apply search
+        if (this.search) {
+          var q = this.search.toLowerCase();
+          filtered = filtered.filter(function(r) { return r.name.toLowerCase().indexOf(q) !== -1; });
+        }
+        // Apply language filter
+        if (this.languageFilter) {
+          filtered = filtered.filter(function(r) { return r.language === this.languageFilter; }.bind(this));
+        }
+        // Apply sort
+        if (this.sortBy === 'stars') {
+          filtered.sort(function(a, b) { return (b.stargazers_count || 0) - (a.stargazers_count || 0); });
+        } else if (this.sortBy === 'name') {
+          filtered.sort(function(a, b) { return a.name.localeCompare(b.name); });
+        } else {
+          filtered.sort(function(a, b) { return new Date(b.updated_at) - new Date(a.updated_at); });
+        }
+        return filtered;
+      },
+      get languages() {
+        var all = Alpine.store('github').repos;
+        var langs = {};
+        all.forEach(function(r) {
+          if (r.language) langs[r.language] = true;
+        });
+        return Object.keys(langs).sort();
+      },
+      get loading() { return Alpine.store('github').loading; },
+      get error() { return Alpine.store('github').error; }
+    }"
+    x-effect="if (!Alpine.store('github').loading) { search = search; }"
+  >
+    <div class="max-w-5xl mx-auto px-5 py-12">
+      <!-- Page header -->
+      <h1 class="text-4xl md:text-5xl font-black tracking-tighter mb-2">Projects</h1>
+      <p class="text-base text-base-content/60 mb-8">All public repositories, sorted by most recently updated.</p>
 
-    <!-- ======= PAGE HEADER ======= -->
-    <section class="page-header" aria-labelledby="page-title">
-      <div class="container">
-        <h1 id="page-title" class="page-header__title">Projects</h1>
-        <p class="page-header__subtitle">
-          All public repositories, sorted by most recently updated.
-        </p>
+      <!-- Search/Filter/Sort bar -->
+      <div class="flex flex-col md:flex-row gap-3 mb-8">
+        <label class="input input-bordered flex items-center gap-2 flex-1">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="search" class="grow" placeholder="Search repositories..." x-model="search" />
+        </label>
+        <select class="select select-bordered" x-model="languageFilter">
+          <option value="">All Languages</option>
+          <template x-for="lang in languages" :key="lang">
+            <option x-bind:value="lang" x-text="lang"></option>
+          </template>
+        </select>
+        <select class="select select-bordered" x-model="sortBy">
+          <option value="updated">Recently Updated</option>
+          <option value="stars">Most Stars</option>
+          <option value="name">Name (A-Z)</option>
+        </select>
       </div>
-    </section>
 
-    <!-- ======= REPOSITORY LIST ======= -->
-    <section class="section" aria-labelledby="repos-heading">
-      <div class="container">
-        <h2 id="repos-heading" class="visually-hidden">Repositories</h2>
+      <!-- Loading state -->
+      <div x-show="loading" x-cloak role="status" aria-live="polite">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <template x-for="i in 6" :key="i">
+            <div class="card bg-base-100 shadow-sm">
+              <div class="card-body">
+                <div class="skeleton h-6 w-3/4 mb-3"></div>
+                <div class="skeleton h-4 w-full mb-2"></div>
+                <div class="skeleton h-4 w-2/3 mb-2"></div>
+                <div class="skeleton h-4 w-1/3"></div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
 
-        <!-- Status messages -->
-        <div id="repos-status" class="repos-status" aria-live="polite" aria-atomic="true">
-          <div class="repos-status__loading" id="repos-loading">
-            <span class="spinner" aria-hidden="true"></span>
-            Loading repositories&hellip;
-          </div>
-          <div class="repos-status__error" id="repos-error" hidden>
-            <p>
-              Unable to load repositories. This may be due to a rate limit or network issue.<br />
-              <a
-                href="https://github.com/ParzivalXIII?tab=repositories"
-                target="_blank"
-                rel="noopener noreferrer"
-              >View repositories directly on GitHub &#8599;</a>
-            </p>
+      <!-- Error state -->
+      <div x-show="!loading && error" x-cloak>
+        <div class="card bg-base-100 shadow-sm">
+          <div class="card-body items-center text-center">
+            <p class="text-base-content/60 mb-2">Could not load repositories. This may be due to a rate limit or network issue.</p>
+            <a href="https://github.com/ParzivalXIII?tab=repositories" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-sm">View on GitHub &nearr;</a>
           </div>
         </div>
-
-        <!-- Repo cards injected here by repos.js -->
-        <div id="repos-grid" class="cards-grid" aria-label="Repository list"></div>
-
       </div>
-    </section>
 
+      <!-- Empty state -->
+      <div x-show="!loading && !error && repos.length === 0" x-cloak>
+        <div class="card bg-base-100 shadow-sm">
+          <div class="card-body items-center text-center">
+            <p class="text-base-content/60">No repos match your filter.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Repo grid -->
+      <div x-show="!loading && !error && repos.length > 0" x-cloak class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <template x-for="repo in repos" :key="repo.id">
+          <div class="card bg-base-100 shadow-sm hover:shadow-md transition-shadow">
+            <div class="card-body">
+              <h3 class="card-title text-base font-bold">
+                <span x-text="repo.name"></span>
+              </h3>
+              <p class="text-sm text-base-content/60 line-clamp-2 min-h-[2.5em]" x-text="repo.description || 'No description provided.'"></p>
+              <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-xs text-base-content/40">
+                <span x-show="repo.language" class="inline-flex items-center gap-1">
+                  <span class="lang-dot" x-bind:style="'background-color: ' + ({'Python':'#3572A5','JavaScript':'#f1e05a','TypeScript':'#2b7489','HTML':'#e34c26','CSS':'#563d7c','Shell':'#89e051','Dockerfile':'#384d54','Go':'#00ADD8','Rust':'#dea584','Java':'#b07219'}[repo.language] || '#ccc')" aria-hidden="true"></span>
+                  <span x-text="repo.language"></span>
+                </span>
+                <span x-show="repo.stargazers_count > 0" class="inline-flex items-center gap-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.751.751 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"/></svg>
+                  <span x-text="repo.stargazers_count"></span>
+                </span>
+                <span x-show="repo.forks_count > 0" class="inline-flex items-center gap-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M5 5.372v.878c0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75v-.878a2.25 2.25 0 1 1 1.5 0v.878a2.25 2.25 0 0 1-2.25 2.25h-1.5v2.128a2.251 2.251 0 1 1-1.5 0V8.5h-1.5A2.25 2.25 0 0 1 3.5 6.25v-.878a2.25 2.25 0 1 1 1.5 0ZM5 3.25a.75.75 0 1 0-1.5 0 .75.75 0 0 0 1.5 0Zm6.75.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm-3 8.75a.75.75 0 1 0-1.5 0 .75.75 0 0 0 1.5 0Z"/></svg>
+                  <span x-text="repo.forks_count"></span>
+                </span>
+                <span class="inline-flex items-center gap-1">
+                  <span x-text="(function(d) { var n = new Date(); var u = new Date(d); var diff = Math.floor((n - u) / (1000*60*60*24)); if (diff === 0) return 'Updated today'; if (diff === 1) return 'Updated yesterday'; if (diff < 30) return 'Updated ' + diff + ' days ago'; return 'Updated ' + Math.floor(diff/30) + ' months ago'; })(repo.updated_at)"></span>
+                </span>
+              </div>
+              <div class="card-actions mt-3">
+                <a x-bind:href="repo.html_url" target="_blank" rel="noopener noreferrer" class="btn btn-ghost btn-sm text-primary">
+                  View on GitHub &nearr;
+                </a>
+              </div>
+            </div>
+          </div>
+        </template>
+      </div>
+    </div>
   </main>
 
   <!-- ======= FOOTER ======= -->
-  <footer class="footer">
-    <div class="container footer__inner">
-      <p class="footer__copy">&copy; <span id="footer-year"></span> Parzival. Built with HTML, CSS &amp; JavaScript.</p>
-      <a
-        href="https://github.com/ParzivalXIII"
-        class="footer__link"
-        target="_blank"
-        rel="noopener noreferrer"
-      >GitHub</a>
+  <footer class="footer footer-horizontal footer-center sm:footer-horizontal bg-base-200 border-t border-base-300 p-6 mt-auto">
+    <div class="w-full max-w-5xl flex flex-col sm:flex-row items-center justify-between gap-2">
+      <p class="text-sm text-base-content/60">
+        &copy; <span x-text="new Date().getFullYear()"></span> Parzival. All rights reserved.
+      </p>
+      <a href="https://github.com/ParzivalXIII" target="_blank" rel="noopener noreferrer" class="text-sm text-base-content/60 hover:text-primary transition-colors inline-flex items-center gap-1">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+        GitHub
+      </a>
     </div>
   </footer>
 
-  <script>
-    // Navbar mobile toggle
-    const toggle = document.querySelector('.navbar__toggle');
-    const menu   = document.querySelector('.navbar__menu');
-    toggle.addEventListener('click', () => {
-      const expanded = toggle.getAttribute('aria-expanded') === 'true';
-      toggle.setAttribute('aria-expanded', String(!expanded));
-      menu.classList.toggle('navbar__menu--open');
-    });
-
-    // Footer year
-    document.getElementById('footer-year').textContent = new Date().getFullYear();
-  </script>
-  <script src="js/repos.js"></script>
+  <noscript>
+    <div class="fixed inset-0 z-[9999] flex items-center justify-center bg-base-100 p-8">
+      <div class="text-center max-w-md">
+        <p class="text-lg font-bold mb-2">JavaScript is required</p>
+        <p class="text-sm text-base-content/60">This portfolio uses JavaScript for theme switching and GitHub API integration. Please enable JavaScript to view this site.</p>
+      </div>
+    </div>
+  </noscript>
 
 </body>
 </html>

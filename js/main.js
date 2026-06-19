@@ -1,6 +1,10 @@
 /**
- * main.js — Featured repositories for the Home page
- *
+ * main.js — Featured repositories for the Home page (ARCHIVED)
+ * ============================================================
+ * This file is no longer referenced by any HTML page.
+ * The portfolio now uses Alpine.js stores for GitHub API
+ * integration with localStorage caching (5-min TTL).
+ * ------------------------------------------------------------
  * Fetches repo metadata from the GitHub API for each pinned repo
  * and renders cards into #repos in the declared order.
  *
